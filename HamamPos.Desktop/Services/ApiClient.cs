@@ -6,13 +6,14 @@
 
 using HamamPos.Desktop.State;
 using HamamPos.Shared.Dtos;
+using HamamPos.Shared.Models;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 
 namespace HamamPos.Desktop.Services;
 
-public class ApiClient
+public partial class ApiClient
 {
     private readonly HttpClient _http;
     private readonly SessionState _session;
@@ -56,5 +57,70 @@ public class ApiClient
     {
         ApplyAuthHeader();
         return await _http.GetFromJsonAsync<T>(path, ct);
+    }
+
+    // Ürün listesi
+    public async Task<List<Product>?> GetProductsAsync(CancellationToken ct = default)
+        => await GetAsync<List<Product>>("/products", ct);
+
+    // Birim listesi
+    public async Task<List<ServiceUnit>?> GetUnitsAsync(CancellationToken ct = default)
+        => await GetAsync<List<ServiceUnit>>("/units", ct);
+
+    //public async Task<TicketDto?> OpenTicketAsync(int serviceUnitId, CancellationToken ct = default)
+    //{
+    //    ApplyAuthHeader();
+    //    var req = new CreateTicketRequest(serviceUnitId);
+    //    var res = await _http.PostAsJsonAsync("/tickets/open", req, ct);
+    //    if (!res.IsSuccessStatusCode) return null;
+    //    return await res.Content.ReadFromJsonAsync<TicketDto>(cancellationToken: ct);
+    //}
+
+    //public async Task<TicketDto?> AddItemAsync(int ticketId, int productId, decimal quantity = 1, CancellationToken ct = default)
+    //{
+    //    ApplyAuthHeader();
+    //    var req = new AddItemRequest(ticketId, productId, quantity);
+    //    var res = await _http.PostAsJsonAsync($"/tickets/{ticketId}/items", req, ct);
+    //    if (!res.IsSuccessStatusCode) return null;
+    //    return await res.Content.ReadFromJsonAsync<TicketDto>(cancellationToken: ct);
+    //}
+
+    //public async Task<TicketDto?> PayAsync(int ticketId, PayMethod method, CancellationToken ct = default)
+    //{
+    //    ApplyAuthHeader();
+    //    var req = new PayTicketRequest(ticketId, method);
+    //    var res = await _http.PostAsJsonAsync($"/tickets/{ticketId}/pay", req, ct);
+    //    if (!res.IsSuccessStatusCode) return null;
+    //    return await res.Content.ReadFromJsonAsync<TicketDto>(cancellationToken: ct);
+    //}
+
+    public async Task<TicketDto?> OpenTicketAsync(int serviceUnitId, CancellationToken ct = default)
+    {
+        ApplyAuthHeader();
+        var res = await _http.PostAsJsonAsync("/tickets/open", new OpenTicketRequest(serviceUnitId), ct);
+        if (!res.IsSuccessStatusCode) return null;
+        return await res.Content.ReadFromJsonAsync<TicketDto>(cancellationToken: ct);
+    }
+
+    public async Task<TicketDto?> AddItemAsync(int ticketId, int productId, decimal qty, CancellationToken ct = default)
+    {
+        ApplyAuthHeader();
+        var res = await _http.PostAsJsonAsync($"/tickets/{ticketId}/items", new AddItemRequest(ticketId, productId, qty), ct);
+        if (!res.IsSuccessStatusCode) return null;
+        return await res.Content.ReadFromJsonAsync<TicketDto>(cancellationToken: ct);
+    }
+
+    public async Task<TicketDto?> PayAsync(int ticketId, PayMethod method, CancellationToken ct = default)
+    {
+        ApplyAuthHeader();
+        var res = await _http.PostAsJsonAsync($"/tickets/{ticketId}/pay", new PayTicketRequest(ticketId, method), ct);
+        if (!res.IsSuccessStatusCode) return null;
+        return await res.Content.ReadFromJsonAsync<TicketDto>(cancellationToken: ct);
+    }
+
+    public async Task<TicketDto?> GetTicketAsync(int ticketId, CancellationToken ct = default)
+    {
+        ApplyAuthHeader();
+        return await _http.GetFromJsonAsync<TicketDto>($"/tickets/{ticketId}", ct);
     }
 }

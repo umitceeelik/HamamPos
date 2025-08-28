@@ -18,32 +18,58 @@ public partial class App : Application
     private SessionState _session = null!;
     private ApiClient _api = null!;
 
+    public SessionState Session => _session;
+    public ApiClient Api => _api;
+
+    // App.xaml.cs
     protected override void OnStartup(StartupEventArgs e)
     {
         base.OnStartup(e);
 
         _session = new SessionState();
-        _api = new ApiClient(_session, baseUrl: "http://localhost:5005"); // gerekirse IP değiştir
+        _api = new ApiClient(_session, baseUrl: "http://localhost:5005");
 
-        var vm = new LoginViewModel(_api, _session);
-        var win = new LoginWindow { DataContext = vm };
+        var loginVm = new LoginViewModel(_api, _session);
+        var loginWin = new LoginWindow { DataContext = loginVm };
 
-        vm.OnLoggedIn = async () =>
+        // Uygulama, son pencere kapanınca kapanmasın; geçişi biz kontrol edelim
+        Current.ShutdownMode = ShutdownMode.OnExplicitShutdown;
+
+        loginVm.OnLoggedIn = async () =>
         {
-            // Login'i kapat, ana pencereyi aç
-            win.Dispatcher.Invoke(() => win.Close());
-            await OpenMainAsync();
+            await loginWin.Dispatcher.InvokeAsync(() =>
+            {
+                // --- Main'i oluştur ve göster
+                var mainVm = new MainViewModel(_api, _session);
+                var main = new MainWindow { DataContext = mainVm };
+
+                // Uygulamanın ana penceresi artık bu
+                Current.MainWindow = main;
+                main.Show();
+
+                // Login'i şimdi kapat
+                loginWin.Close();
+
+                // Verileri asenkron yükle (fire-and-forget)
+                _ = mainVm.LoadAsync();
+
+                // Artık normal davranışa dönebiliriz
+                Current.ShutdownMode = ShutdownMode.OnLastWindowClose;
+            });
         };
 
-        win.Show();
+        loginWin.Show();
     }
+
 
     private Task OpenMainAsync()
     {
-        var main = new MainWindow();
-        // Basit demo context: "kim girdi / rolü ne"
-        main.DataContext = new { User = _session.Username, Role = _session.Role };
+        // MainViewModel'i ver ve Load() çağır
+        var mainVm = new MainViewModel(_api, _session);
+        var main = new MainWindow { DataContext = mainVm };
         main.Show();
+        _ = mainVm.LoadAsync(); // fire-and-forget, ekranda yükleniyor yazısı görünecek
         return Task.CompletedTask;
     }
+
 }

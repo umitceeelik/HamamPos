@@ -4,8 +4,8 @@
              xmlns:conv="clr-namespace:HamamPos.Desktop.Converters">
     <Application.Resources>
         <ResourceDictionary>
-            <conv:BoolToTextConverter   x:Key="BoolToText"   />
-            <conv:InverseBoolConverter  x:Key="InverseBool"  />
+            <conv:BoolToTextConverter  x:Key="BoolToText" />
+            <conv:InverseBoolConverter x:Key="InverseBool" />
 
             <Style TargetType="Control" x:Key="TopSpacedControl">
                 <Setter Property="Margin" Value="0,6,0,0"/>
