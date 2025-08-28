@@ -1,0 +1,34 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HamamPos.Shared", "HamamPos.Shared\HamamPos.Shared.csproj", "{3D75F0CA-D149-4C4B-A71A-CD581A34FA02}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HamamPos.Api", "HamamPos.Api\HamamPos.Api.csproj", "{9F853CDB-6254-4C36-9F27-6D7A512935C5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HamamPos.Desktop", "HamamPos.Desktop\HamamPos.Desktop.csproj", "{2D20F6DF-77A0-44BD-816E-7222B5EB6253}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{3D75F0CA-D149-4C4B-A71A-CD581A34FA02}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3D75F0CA-D149-4C4B-A71A-CD581A34FA02}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3D75F0CA-D149-4C4B-A71A-CD581A34FA02}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3D75F0CA-D149-4C4B-A71A-CD581A34FA02}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9F853CDB-6254-4C36-9F27-6D7A512935C5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9F853CDB-6254-4C36-9F27-6D7A512935C5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9F853CDB-6254-4C36-9F27-6D7A512935C5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9F853CDB-6254-4C36-9F27-6D7A512935C5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2D20F6DF-77A0-44BD-816E-7222B5EB6253}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2D20F6DF-77A0-44BD-816E-7222B5EB6253}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2D20F6DF-77A0-44BD-816E-7222B5EB6253}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2D20F6DF-77A0-44BD-816E-7222B5EB6253}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
