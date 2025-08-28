@@ -4,16 +4,18 @@
 // - /auth/login ile token verilir.
 // - /units ve /products POS ekraný için basit listeler döner.
 
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text;
 using BCrypt.Net;
 using HamamPos.Api.Data;
+using HamamPos.Api.Endpoints;
 using HamamPos.Shared.Dtos;
 using HamamPos.Shared.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
+//using HamamPos.Api.Endpoints;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -85,6 +87,7 @@ app.MapGet("/health", () => "ok");
 // Auth: doðru kullanýcý/þifre ise token üret
 app.MapPost("/auth/login", async (AppDbContext db, LoginRequest req) =>
 {
+    Console.WriteLine($"LOGIN TRY: {req.Username} / {req.Password}");
     var user = await db.Users.FirstOrDefaultAsync(u => u.Username == req.Username && u.IsActive);
     if (user is null || !BCrypt.Net.BCrypt.Verify(req.Password, user.PasswordHash))
         return Results.Unauthorized();
@@ -111,5 +114,7 @@ app.MapGet("/units", async (AppDbContext db) =>
 
 app.MapGet("/products", async (AppDbContext db) =>
     await db.Products.Where(p => p.IsActive).OrderBy(p => p.Category).ThenBy(p => p.Name).ToListAsync());
+
+app.MapTicketEndpoints();
 
 app.Run();
