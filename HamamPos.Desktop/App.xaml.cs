@@ -1,75 +1,41 @@
-﻿// Burada "composition root" gibi davranıyoruz:
-// - Tekil SessionState ve ApiClient örnekleri oluşturulur.
-// - Uygulama LoginWindow ile başlar.
-// - Başarılı login sonrasında MainWindow açılır.
-// - İleride: Role'e göre yönlendirme (Admin -> Ana Menü, User -> direkt POS)
-
-using System.Threading.Tasks;
+﻿// Desktop/App.xaml.cs
 using System.Windows;
+using HamamPos.Desktop.Navigation;
 using HamamPos.Desktop.Services;
 using HamamPos.Desktop.State;
 using HamamPos.Desktop.ViewModels;
-using HamamPos.Desktop.Views;
 
 namespace HamamPos.Desktop;
 
 public partial class App : Application
 {
-    private SessionState _session = null!;
-    private ApiClient _api = null!;
-
-    public SessionState Session => _session;
-    public ApiClient Api => _api;
-
-    // App.xaml.cs
     protected override void OnStartup(StartupEventArgs e)
     {
         base.OnStartup(e);
 
-        _session = new SessionState();
-        _api = new ApiClient(_session, baseUrl: "http://localhost:5005");
+        // Tekil servisler
+        var session = new SessionState();
+        var api = new ApiClient(session, "http://localhost:5005");
 
-        var loginVm = new LoginViewModel(_api, _session);
-        var loginWin = new LoginWindow { DataContext = loginVm };
+        // Navigation altyapısı
+        var store = new NavigationStore();
+        var nav = new NavigationService(store);
 
-        // Uygulama, son pencere kapanınca kapanmasın; geçişi biz kontrol edelim
-        Current.ShutdownMode = ShutdownMode.OnExplicitShutdown;
+        // Shell
+        var shellVm = new ShellViewModel(store, nav);
+        var shell = new MainWindow { DataContext = shellVm };
+        shell.Show();
 
+        // 1) Login ile başla
+        var loginVm = new LoginViewModel(api, session);
+        store.CurrentViewModel = loginVm;
+
+        // Giriş başarılı olduğunda Ana Menüyü yükle
         loginVm.OnLoggedIn = async () =>
         {
-            await loginWin.Dispatcher.InvokeAsync(() =>
-            {
-                // --- Main'i oluştur ve göster
-                var mainVm = new MainViewModel(_api, _session);
-                var main = new MainWindow { DataContext = mainVm };
-
-                // Uygulamanın ana penceresi artık bu
-                Current.MainWindow = main;
-                main.Show();
-
-                // Login'i şimdi kapat
-                loginWin.Close();
-
-                // Verileri asenkron yükle (fire-and-forget)
-                _ = mainVm.LoadAsync();
-
-                // Artık normal davranışa dönebiliriz
-                Current.ShutdownMode = ShutdownMode.OnLastWindowClose;
-            });
+            var homeVm = new HomeViewModel(store, nav, api, session);
+            nav.Navigate(homeVm);
+            await homeVm.LoadAsync(); // gerekiyorsa
         };
-
-        loginWin.Show();
     }
-
-
-    private Task OpenMainAsync()
-    {
-        // MainViewModel'i ver ve Load() çağır
-        var mainVm = new MainViewModel(_api, _session);
-        var main = new MainWindow { DataContext = mainVm };
-        main.Show();
-        _ = mainVm.LoadAsync(); // fire-and-forget, ekranda yükleniyor yazısı görünecek
-        return Task.CompletedTask;
-    }
-
 }

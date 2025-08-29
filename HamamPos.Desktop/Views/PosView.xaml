@@ -1,0 +1,180 @@
+﻿<!-- Views/PosView.xaml -->
+<UserControl x:Class="HamamPos.Desktop.Views.PosView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             UseLayoutRounding="True" SnapsToDevicePixels="True">
+
+    <!-- View’e özel kaynaklar -->
+    <UserControl.Resources>
+
+        <!-- Ünite buton stili: FlatButton’ı temel al, doluysa kırmızı yap -->
+        <Style x:Key="UnitButtonStyle"
+               TargetType="Button"
+               BasedOn="{StaticResource FlatButton}">
+            <Style.Triggers>
+                <!-- Desktop tarafında partial class ile ServiceUnit.IsOccupied bool ekliyoruz -->
+                <DataTrigger Binding="{Binding IsOccupied}" Value="True">
+                    <Setter Property="Background"  Value="#FFE57373"/>
+                    <Setter Property="BorderBrush" Value="#FFB71C1C"/>
+                    <Setter Property="Foreground"  Value="White"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- DataGrid varsayılanları (isteğe bağlı) -->
+        <Style TargetType="DataGrid">
+            <Setter Property="CanUserAddRows" Value="False"/>
+            <Setter Property="IsReadOnly"     Value="True"/>
+            <Setter Property="HeadersVisibility" Value="Column"/>
+        </Style>
+
+    </UserControl.Resources>
+
+    <Grid Margin="8">
+        <!-- 0: Üst bar, 1: İçerik, 2: Alt bar -->
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- ===== ÜST BAR ===== -->
+        <DockPanel Grid.Row="0" LastChildFill="True" Margin="0,0,0,8">
+            <StackPanel DockPanel.Dock="Left"
+                        Orientation="Horizontal"
+                        VerticalAlignment="Center">
+                <!-- IsInTicket=false → “Hamam POS”; true → seçili oda adı -->
+                <TextBlock FontWeight="Bold" FontSize="16" Margin="0,0,12,0">
+                    <TextBlock.Style>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="Text" Value="Hamam POS"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsInTicket}" Value="True">
+                                    <Setter Property="Text" Value="{Binding SelectedUnit.Name}"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
+
+                <TextBlock Text="{Binding Error}" Foreground="Tomato"/>
+            </StackPanel>
+
+            <StackPanel DockPanel.Dock="Right"
+                        Orientation="Horizontal"
+                        VerticalAlignment="Center">
+                <Button Content="Ana Menü" Margin="0,0,8,0" Padding="12,4"
+                        Command="{Binding GoHomeCommand}"/>
+                <!-- Geri sadece POS görünümünde -->
+                <Button Content="Geri" Padding="12,4"
+                        Visibility="{Binding IsInTicket, Converter={StaticResource BoolToVisibility}}"
+                        Command="{Binding BackToUnitsCommand}"/>
+            </StackPanel>
+        </DockPanel>
+
+        <!-- ===== İÇERİK ===== -->
+        <Grid Grid.Row="1">
+
+            <!-- 1) ODA/DOLAP LİSTESİ KATMANI -->
+            <ScrollViewer x:Name="UnitsLayer"
+                          HorizontalScrollBarVisibility="Disabled">
+                <ItemsControl ItemsSource="{Binding Units}">
+                    <!-- Ekranı homojen doldurmak için UniformGrid (Columns’ı ihtiyaca göre değiştir) -->
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <UniformGrid Columns="10"/>
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Button Content="{Binding Name}"
+                                    Style="{StaticResource UnitButtonStyle}"
+                                    Command="{Binding DataContext.OpenUnitCommand,
+                                                      RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                    CommandParameter="{Binding}"/>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+
+                <!-- POS görünümüne geçince ünite katmanını gizle -->
+                <ScrollViewer.Style>
+                    <Style TargetType="ScrollViewer">
+                        <Setter Property="Visibility" Value="Visible"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsInTicket}" Value="True">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </ScrollViewer.Style>
+            </ScrollViewer>
+
+            <!-- 2) POS (ADİSYON) KATMANI -->
+            <Grid x:Name="PosLayer"
+                  Visibility="{Binding IsInTicket, Converter={StaticResource BoolToVisibility}}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="3*"/>
+                    <!-- Sol: satırlar -->
+                    <ColumnDefinition Width="2*"/>
+                    <!-- Sağ: ürünler -->
+                </Grid.ColumnDefinitions>
+
+                <!-- SOL: adisyon satırları -->
+                <DataGrid Grid.Column="0" Margin="0,0,8,0"
+                          ItemsSource="{Binding CurrentTicket.Items}"
+                          AutoGenerateColumns="False">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Ürün"  Binding="{Binding ProductName}" Width="*"/>
+                        <DataGridTextColumn Header="Adet"  Binding="{Binding Quantity}"   Width="80"/>
+                        <DataGridTextColumn Header="Fiyat" Binding="{Binding UnitPrice, StringFormat=₺{0:N2}}" Width="120"/>
+                        <DataGridTextColumn Header="Tutar" Binding="{Binding LineTotal, StringFormat=₺{0:N2}}" Width="120"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+
+                <!-- SAĞ: ürün butonları (DİKKAT: Grid’de tek satır var; Row KULLANMIYORUZ) -->
+                <Border Grid.Column="1" Padding="0">
+                    <ScrollViewer HorizontalScrollBarVisibility="Disabled">
+                        <ItemsControl ItemsSource="{Binding Products}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <WrapPanel/>
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Button Style="{StaticResource FlatButton}"
+                                            Width="160" Height="64"
+                                            Command="{Binding DataContext.AddItemCommand,
+                                                              RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                            CommandParameter="{Binding}">
+                                        <StackPanel>
+                                            <TextBlock Text="{Binding Name}" HorizontalAlignment="Center"/>
+                                            <TextBlock Text="{Binding BasePrice, StringFormat=₺{0:N2}}"
+                                                       HorizontalAlignment="Center" Opacity="0.7" FontSize="12"/>
+                                        </StackPanel>
+                                    </Button>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
+                </Border>
+            </Grid>
+        </Grid>
+
+        <!-- ===== ALT BAR (yalnızca POS açıkken) ===== -->
+        <StackPanel Grid.Row="2"
+                    Orientation="Horizontal"
+                    HorizontalAlignment="Right"
+                    Visibility="{Binding IsInTicket, Converter={StaticResource BoolToVisibility}}">
+            <StackPanel Orientation="Vertical" Margin="0,0,12,0">
+                <TextBlock Text="{Binding CurrentTicket.Total,   StringFormat=Toplam: ₺{0:N2}}"/>
+                <TextBlock Text="{Binding CurrentTicket.Balance, StringFormat=Bakiye: ₺{0:N2}}"/>
+            </StackPanel>
+            <Button Content="Nakit" Width="110" Margin="6"
+                    Command="{Binding PayCommand}" CommandParameter="Cash"/>
+            <Button Content="Kart" Width="110" Margin="6"
+                    Command="{Binding PayCommand}" CommandParameter="Card"/>
+        </StackPanel>
+    </Grid>
+</UserControl>

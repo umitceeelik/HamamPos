@@ -63,10 +63,19 @@ public partial class ApiClient
     public async Task<List<Product>?> GetProductsAsync(CancellationToken ct = default)
         => await GetAsync<List<Product>>("/products", ct);
 
-    // Birim listesi
+    // Oda/dolap listesi
     public async Task<List<ServiceUnit>?> GetUnitsAsync(CancellationToken ct = default)
         => await GetAsync<List<ServiceUnit>>("/units", ct);
 
+    // Oda doluluk bilgisi
+    public async Task<List<UnitStatusDto>> GetUnitStatusesAsync(CancellationToken ct = default)
+    {
+        ApplyAuthHeader();
+        var res = await _http.GetFromJsonAsync<List<UnitStatusDto>>("/units/with-status", ct);
+        return res ?? new();
+    }
+
+    // Yeni adisyon aç
     public async Task<TicketDto?> OpenTicketAsync(int serviceUnitId, CancellationToken ct = default)
     {
         ApplyAuthHeader();
@@ -75,6 +84,7 @@ public partial class ApiClient
         return await res.Content.ReadFromJsonAsync<TicketDto>(cancellationToken: ct);
     }
 
+    // Adisyona ürün ekle
     public async Task<TicketDto?> AddItemAsync(int ticketId, int productId, decimal qty, CancellationToken ct = default)
     {
         ApplyAuthHeader();
@@ -83,6 +93,7 @@ public partial class ApiClient
         return await res.Content.ReadFromJsonAsync<TicketDto>(cancellationToken: ct);
     }
 
+    // Adisyonu kapat (ödeme)
     public async Task<TicketDto?> PayAsync(int ticketId, PayMethod method, CancellationToken ct = default)
     {
         ApplyAuthHeader();
@@ -91,6 +102,7 @@ public partial class ApiClient
         return await res.Content.ReadFromJsonAsync<TicketDto>(cancellationToken: ct);
     }
 
+    // Adisyon detayını getir
     public async Task<TicketDto?> GetTicketAsync(int ticketId, CancellationToken ct = default)
     {
         ApplyAuthHeader();

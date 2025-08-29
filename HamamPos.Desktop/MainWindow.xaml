@@ -1,0 +1,13 @@
+﻿<!-- Desktop/MainWindow.xaml -->
+<Window x:Class="HamamPos.Desktop.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Hamam POS" Width="1280" Height="720"
+        WindowStartupLocation="CenterScreen"
+        WindowState="Maximized"
+        SizeToContent="Manual"
+        UseLayoutRounding="True"
+        SnapsToDevicePixels="True">
+    <!-- Sadece tek ContentControl: store.CurrentViewModel ne ise onu gösterir -->
+    <ContentControl Content="{Binding Store.CurrentViewModel}"/>
+</Window>
