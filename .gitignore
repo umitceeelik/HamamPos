@@ -482,3 +482,8 @@ $RECYCLE.BIN/
 
 # Vim temporary swap files
 *.swp
+
+# SQLite runtime DB files (do not commit)
+HamamPos.Api/hamampos.db*
+*.db-wal
+*.db-shm

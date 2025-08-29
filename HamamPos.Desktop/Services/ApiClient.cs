@@ -67,33 +67,6 @@ public partial class ApiClient
     public async Task<List<ServiceUnit>?> GetUnitsAsync(CancellationToken ct = default)
         => await GetAsync<List<ServiceUnit>>("/units", ct);
 
-    //public async Task<TicketDto?> OpenTicketAsync(int serviceUnitId, CancellationToken ct = default)
-    //{
-    //    ApplyAuthHeader();
-    //    var req = new CreateTicketRequest(serviceUnitId);
-    //    var res = await _http.PostAsJsonAsync("/tickets/open", req, ct);
-    //    if (!res.IsSuccessStatusCode) return null;
-    //    return await res.Content.ReadFromJsonAsync<TicketDto>(cancellationToken: ct);
-    //}
-
-    //public async Task<TicketDto?> AddItemAsync(int ticketId, int productId, decimal quantity = 1, CancellationToken ct = default)
-    //{
-    //    ApplyAuthHeader();
-    //    var req = new AddItemRequest(ticketId, productId, quantity);
-    //    var res = await _http.PostAsJsonAsync($"/tickets/{ticketId}/items", req, ct);
-    //    if (!res.IsSuccessStatusCode) return null;
-    //    return await res.Content.ReadFromJsonAsync<TicketDto>(cancellationToken: ct);
-    //}
-
-    //public async Task<TicketDto?> PayAsync(int ticketId, PayMethod method, CancellationToken ct = default)
-    //{
-    //    ApplyAuthHeader();
-    //    var req = new PayTicketRequest(ticketId, method);
-    //    var res = await _http.PostAsJsonAsync($"/tickets/{ticketId}/pay", req, ct);
-    //    if (!res.IsSuccessStatusCode) return null;
-    //    return await res.Content.ReadFromJsonAsync<TicketDto>(cancellationToken: ct);
-    //}
-
     public async Task<TicketDto?> OpenTicketAsync(int serviceUnitId, CancellationToken ct = default)
     {
         ApplyAuthHeader();
