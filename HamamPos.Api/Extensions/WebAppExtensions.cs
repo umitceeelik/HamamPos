@@ -39,12 +39,9 @@ public static class WebAppExtensions
         // LOGIN ÖNCE GELMELİ (Anonymous)
         app.MapAuthEndpoints();
 
-        // Basit liste uçları (anonim kalabilir veya RequireAuthorization da yapabiliriz)
-        app.MapGet("/units", async (AppDbContext db) =>
-            await db.ServiceUnits.OrderBy(u => u.Type).ThenBy(u => u.Id).ToListAsync());
-
-        app.MapGet("/products", async (AppDbContext db) =>
-            await db.Products.Where(p => p.IsActive).OrderBy(p => p.Category).ThenBy(p => p.Name).ToListAsync());
+        // Pos listeleri (şimdilik anonim; istersen RequireAuthorization ekleyebilirsin)
+        app.MapUnitsEndpoints();
+        app.MapProductsEndpoints();
 
         // Tickets grubu (genelde auth gerektirir; TicketEndpoints.cs’de RequireAuthorization ekleyebilirsin)
         app.MapTicketEndpoints();
